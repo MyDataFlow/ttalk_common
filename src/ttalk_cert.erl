@@ -3,9 +3,9 @@
 
 -include_lib("public_key/include/public_key.hrl").
 
--export([public_key/1]).
+-export([rsa_public_key/1]).
 
-public_key(RawX509) ->
+rsa_public_key(RawX509) ->
 	OTPX509 = decode_otp(RawX509),
 	#'OTPCertificate'{tbsCertificate = TBS} = OTPX509,
 	PublicKey = TBS#'OTPTBSCertificate'.subjectPublicKeyInfo,
