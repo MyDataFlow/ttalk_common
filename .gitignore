@@ -32,3 +32,4 @@ deps
 \#*\#
 *.app
 
+Mnesia.*

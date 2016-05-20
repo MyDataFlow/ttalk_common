@@ -52,7 +52,7 @@ next_node_id() ->
 %% 使用Mnesia进行foldl找到最大的id
 -spec max_node_id() -> nodeid().
 max_node_id() ->
-    mnesia:foldl(fun(#ttalk_machine{id=Id}, Max) -> max(Id, Max) end, 0, node).
+    mnesia:foldl(fun(#ttalk_machine{id=Id}, Max) -> max(Id, Max) end, 0, ttalk_machine).
 
 -spec select_node_id(NodeName :: atom()) -> {'error','not_found'} | {'ok',nodeid()}.
 select_node_id(NodeName) ->
@@ -67,7 +67,7 @@ name(hostname)->
 	unicode:characters_to_binary(HostName);
 name(node) ->
 	Node = node(),
-	erlang:atom_to_binary(Node).
+	erlang:atom_to_binary(Node,utf8).
 
 -spec id(atom(),atom()|list())-> {ok,nodeid()}.
 id(hw_addr,default)->	
