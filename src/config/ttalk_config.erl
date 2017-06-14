@@ -10,7 +10,7 @@
 start() ->
     %% 创建配置管理表
     %% 使用内存模式
-    mnesia:create_table(config,
+    mnesia:create_table(ttalk_config,
                         [{ram_copies, [node()]},
                          {storage_properties,
                           [{ets, [{read_concurrency, true}]}]},
