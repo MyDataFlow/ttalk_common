@@ -36,7 +36,6 @@ get_option(Opt) ->
 -spec load_file(File :: string()) -> ok.
 load_file(File) ->
     Res = parse_file(File),
-    io:format("~p~n",[Res]),
     {atomic,ok} = mnesia:transaction(fun()->
       lists:foreach(fun({K,V}) ->
         C = #ttalk_config{key = K,value = V},
