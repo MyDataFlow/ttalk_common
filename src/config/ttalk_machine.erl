@@ -8,10 +8,10 @@
 -record(ttalk_machine, {
 		  name :: atom(),
 		  id :: nodeid()
-         }).
+		}).
 
 %% 跟新Mneisa中的Node的ID
-start() ->	
+start() ->
     mnesia:create_table(ttalk_machine,
             [{ram_copies, [node()]},
              {type, set},
@@ -70,12 +70,12 @@ name(node) ->
 	erlang:atom_to_binary(Node,utf8).
 
 -spec id(atom(),atom()|list())-> {ok,nodeid()}.
-id(hw_addr,default)->	
+id(hw_addr,default)->
 	HwAddrs = hw_addrs(),
 	First = lists:nth(1,HwAddrs),
-	{ok,NodeId} = hw_addr_to_integer(First), 
+	{ok,NodeId} = hw_addr_to_integer(First),
 	{ok,NodeId};
-id(hw_addr,Interface) ->	
+id(hw_addr,Interface) ->
 	HwAddr = hw_addr(Interface),
 	{ok,NodeId} = hw_addr_to_integer(HwAddr),
 	{ok,NodeId}.
@@ -103,9 +103,7 @@ hw_addr(Interface)->
 
 hw_addr_to_integer({_Inteface,undefined})->
 	{error,undefined};
-hw_addr_to_integer({_Inteface,HwAddr})->				
+hw_addr_to_integer({_Inteface,HwAddr})->
 	Bin = erlang:list_to_binary(HwAddr),
 	<<Int:48/big-unsigned-integer>> = Bin,
 	{ok,Int}.
-
-

@@ -28,7 +28,7 @@ del_option(Opt) ->
 
 get_option(Opt) ->
   case ets:lookup(ttalk_config, Opt) of
-    [#config{value = Val}] ->
+    [#ttalk_config{value = Val}] ->
       Val;
     _ ->
       undefined
