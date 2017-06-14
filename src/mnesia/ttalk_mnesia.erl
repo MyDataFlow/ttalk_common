@@ -1,7 +1,7 @@
 -module(ttalk_mnesia).
--export([ensure_mnesia/1]).
-ensure_mnesia(CreateFun)->
-  ok = application:ensure_started(mneisa),
+-export([ensure/1]).
+ensure(CreateFun)->
+  ok = application:ensure_started(mnesia),
 	ensure_mnesia_dir(),
 	case is_virgin_node() of
 		true ->
@@ -29,7 +29,7 @@ end.
 ensure_mnesia_schema()->
   ok = application:stop(mnesia),
   ok = mnesia:create_schema([node()]),
-  ok = application:ensure_started(mneisa),
+  ok = application:ensure_started(mnesia),
   ok.
 
 is_virgin_node() ->
@@ -43,8 +43,8 @@ is_virgin_node() ->
   end.
 
 init_mnesia()->
-  ok = application:ensure_started(mneisa),
-  mneisa:wait_for_tables(mnesia:system_info(local_tables),infinity).
+  ok = application:ensure_started(mnesia),
+  mnesia:wait_for_tables(mnesia:system_info(local_tables),infinity).
 
 aborted_on_error(Result)->
   case Result of
