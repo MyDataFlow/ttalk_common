@@ -1,7 +1,7 @@
 -module(ttalk_config).
 -export([start/0,load_file/1]).
 -export([add_option/2,get_option/1,del_option/1]).
--record(config, {key,value}).
+-record(ttalk_config, {key,value}).
 
 %%%===================================================================
 %%% API functions
@@ -14,20 +14,20 @@ start() ->
                         [{ram_copies, [node()]},
                          {storage_properties,
                           [{ets, [{read_concurrency, true}]}]},
-                         {attributes, record_info(fields, config)}]),
+                         {attributes, record_info(fields, ttalk_config)}]),
     %% 如果存在多节点则会将自己加入其中
     mnesia:add_table_copy(config, node(), ram_copies),
     ok.
 
 add_option(Opt, Val) ->
   mnesia:transaction(fun() ->
-    mnesia:write(#config{key   = Opt,value = Val})
+    mnesia:write(#ttalk_config{key   = Opt,value = Val})
   end).
 del_option(Opt) ->
   mnesia:transaction(fun mnesia:delete/1, [{config, Opt}]).
 
 get_option(Opt) ->
-  case ets:lookup(config, Opt) of
+  case ets:lookup(ttalk_config, Opt) of
     [#config{value = Val}] ->
       Val;
     _ ->
@@ -39,7 +39,7 @@ load_file(File) ->
     io:format("~p~n",[Res]),
     {atomic,ok} = mnesia:transaction(fun()->
       lists:foreach(fun({K,V}) ->
-        C = #config{key = K,value = V},
+        C = #ttalk_config{key = K,value = V},
         mnesia:write(C)
       end, Res)
     end).
