@@ -59,12 +59,12 @@ prepare(Name, Statement) when is_binary(Name) ->
     end.
 
 -spec execute(Pool :: pool(), Name :: binary(), Parameters :: [term()]) ->query_result().
-execute(Pool, Name, Parameters) is_list(Parameters) ->
+execute(Pool, Name, Parameters) when is_list(Parameters) ->
     execute(Pool, Name, Parameters,?TRANSACTION_TIMEOUT).
 
 -spec execute(Pool :: pool(), Name :: binary(),
 		Parameters :: [term()],Timeout :: non_neg_integer()) ->query_result().
-execute(Pool, Name, Parameters,Timeout)is_list(Parameters) ->
+execute(Pool, Name, Parameters,Timeout) when is_list(Parameters) ->
 	 sql_call(Pool, {sql_execute, Name, Parameters},Timeout).
 
 -spec sql_query(Pool :: pool(), Query :: any()) -> query_result().
