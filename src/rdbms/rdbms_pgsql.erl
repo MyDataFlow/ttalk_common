@@ -23,7 +23,7 @@ disconnect(Connection) ->
 -spec query(Connection :: term(), Query :: any(),
             Timeout :: infinity | non_neg_integer()) -> rdbms_worker:query_result().
 query(Connection, Query, _Timeout) ->
-    pgsql_to_odbc(epgsql:squery(Connection, Query)).
+    pgsql_to_odbc(epgsql:equery(Connection, Query,[])).
 
 -spec prepare(Connection :: term(), Name :: atom(),
   Statement :: iodata()) -> {ok, term()} | {error, any()}.
