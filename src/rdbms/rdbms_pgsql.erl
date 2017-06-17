@@ -2,7 +2,7 @@
 
 -include_lib("epgsql/include/epgsql.hrl").
 
--export([connect/2, disconnect/1, query/2, prepare/3, execute/4]).
+-export([connect/2, disconnect/1, query/2, prepare/3, execute/3]).
 
 -spec connect(Args :: any(), QueryTimeout :: non_neg_integer()) ->
                      {ok, Connection :: term()} | {error, Reason :: any()}.
@@ -33,9 +33,9 @@ prepare(Connection, Name, Statement) ->
         Error   -> Error
     end.
 
--spec execute(Connection :: term(), StatementRef :: term(), Params :: [term()],
-              Timeout :: infinity | non_neg_integer()) -> rdbms_worker:query_result().
-execute(Connection, StatementRef, Params, _Timeout) ->
+-spec execute(Connection :: term(), StatementRef :: term(),
+  Params :: [term()]) -> rdbms_worker:query_result().
+execute(Connection, StatementRef, Params) ->
     pgsql_to_odbc(epgsql:prepared_query(Connection, StatementRef, Params)).
 
 %% Helpers

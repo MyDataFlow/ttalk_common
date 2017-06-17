@@ -256,10 +256,9 @@ sql_query_internal(Query, #state{db_ref = DBRef}) ->
 	rdbms_pgsql:query(DBRef, Query).
 
 -spec sql_execute(Name :: atom(), Params :: [term()], state()) -> {query_result(), state()}.
-sql_execute(Name, Params, State = #state{db_ref = DBRef,settings = Settings}) ->
+sql_execute(Name, Params, State = #state{db_ref = DBRef}) ->
     {StatementRef, NewState} = prepare_statement(Name, State),
-		QueryTimeout = proplists:get_value(query_timeout,Settings),
-    Res = rdbms_pgsql:execute(DBRef, StatementRef, Params, QueryTimeout),
+    Res = rdbms_pgsql:execute(DBRef, StatementRef, Params),
     {Res, NewState}.
 
 -spec prepare_statement(Name :: atom(), state()) -> {Ref :: term(), state()}.
