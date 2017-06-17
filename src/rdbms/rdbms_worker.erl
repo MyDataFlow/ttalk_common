@@ -51,7 +51,7 @@
 %%% API
 %%%===================================================================
 -spec prepare(Name, Statement :: iodata()) ->
-	{ok, Name} | {error, already_exists} when Name :: atom().
+	{ok, Name} | {error, already_exists} when Name :: binary().
 prepare(Name, Statement) when is_binary(Name) ->
     case ets:insert_new(prepared_statements, {Name,Statement}) of
         true  -> {ok, Name};
@@ -59,12 +59,12 @@ prepare(Name, Statement) when is_binary(Name) ->
     end.
 
 -spec execute(Pool :: pool(), Name :: binary(), Parameters :: [term()]) ->query_result().
-execute(Pool, Name, Parameters) when is_atom(Name), is_list(Parameters) ->
+execute(Pool, Name, Parameters) is_list(Parameters) ->
     execute(Pool, Name, Parameters,?TRANSACTION_TIMEOUT).
 
 -spec execute(Pool :: pool(), Name :: binary(),
 		Parameters :: [term()],Timeout :: non_neg_integer()) ->query_result().
-execute(Pool, Name, Parameters,Timeout) when is_atom(Name), is_list(Parameters) ->
+execute(Pool, Name, Parameters,Timeout)is_list(Parameters) ->
 	 sql_call(Pool, {sql_execute, Name, Parameters},Timeout).
 
 -spec sql_query(Pool :: pool(), Query :: any()) -> query_result().
