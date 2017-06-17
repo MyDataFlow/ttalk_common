@@ -14,7 +14,7 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
 				 terminate/2, code_change/3]).
 
--export([prepare/4,execute/3,execute/4,sql_query/2,
+-export([prepare/2,execute/3,execute/4,sql_query/2,
 	sql_query/3,sql_transaction/2,sql_transaction/3]).
 
 -type pool() :: atom().
@@ -50,15 +50,10 @@
 %%%===================================================================
 %%% API
 %%%===================================================================
--spec prepare(Name, Table :: binary() | atom(), Fields :: [binary() | atom()],
-	Statement :: iodata()) -> {ok, Name} | {error, already_exists} when Name :: atom().
-prepare(Name, Table, Fields, Statement) when is_atom(Table) ->
-    prepare(Name, erlang:atom_to_binary(Table, utf8), Fields, Statement);
-prepare(Name, Table, [Field | _] = Fields, Statement) when is_atom(Field) ->
-    prepare(Name, Table, [erlang:atom_to_binary(F, utf8) || F <- Fields], Statement);
-prepare(Name, Table, Fields, Statement) when is_atom(Name), is_binary(Table) ->
-    true = lists:all(fun is_binary/1, Fields),
-    case ets:insert_new(prepared_statements, {Name, Table, Fields, Statement}) of
+-spec prepare(Name, Statement :: iodata()) ->
+	{ok, Name} | {error, already_exists} when Name :: atom().
+prepare(Name, Statement) when is_atom(Name) ->
+    case ets:insert_new(prepared_statements, {Name,Statement}) of
         true  -> {ok, Name};
         false -> {error, already_exists}
     end.
@@ -260,7 +255,7 @@ schedule_keepalive(KeepaliveInterval) ->
 sql_query_internal(Query, #state{settings = Settings,db_ref = DBRef}) ->
 	QueryTimeout = proplists:get_value(query_timeout,Settings),
 	rdbms_pgsql:query(DBRef, Query, QueryTimeout).
-	
+
 -spec sql_execute(Name :: atom(), Params :: [term()], state()) -> {query_result(), state()}.
 sql_execute(Name, Params, State = #state{db_ref = DBRef,settings = Settings}) ->
     {StatementRef, NewState} = prepare_statement(Name, State),
@@ -272,8 +267,8 @@ sql_execute(Name, Params, State = #state{db_ref = DBRef,settings = Settings}) ->
 prepare_statement(Name, State = #state{db_ref = DBRef, prepared = Prepared, pool = Pool}) ->
 	    case maps:get(Name, Prepared, undefined) of
 	        undefined ->
-	            [{_, Table, Fields, Statement}] = ets:lookup(prepared_statements, Name),
-	            {ok, Ref} = rdbms_pgsql:prepare(Pool, DBRef, Name, Table, Fields, Statement),
+	            [{_, Statement}] = ets:lookup(prepared_statements, Name),
+	            {ok, Ref} = rdbms_pgsql:prepare(DBRef, Name, Statement),
 	            {Ref, State#state{prepared = maps:put(Name, Ref, Prepared)}};
 	        Ref ->
 	            {Ref, State}
