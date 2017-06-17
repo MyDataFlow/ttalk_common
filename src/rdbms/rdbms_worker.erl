@@ -44,7 +44,7 @@
 	pool,
 	settings,
 	db_ref,
-	prepared = #{} :: #{atom() => term()}
+	prepared = #{} :: #{binary() => term()}
 }).
 -type state() :: #state{}.
 %%%===================================================================
@@ -52,17 +52,17 @@
 %%%===================================================================
 -spec prepare(Name, Statement :: iodata()) ->
 	{ok, Name} | {error, already_exists} when Name :: atom().
-prepare(Name, Statement) when is_atom(Name) ->
+prepare(Name, Statement) when is_binary(Name) ->
     case ets:insert_new(prepared_statements, {Name,Statement}) of
         true  -> {ok, Name};
         false -> {error, already_exists}
     end.
 
--spec execute(Pool :: pool(), Name :: atom(), Parameters :: [term()]) ->query_result().
+-spec execute(Pool :: pool(), Name :: binary(), Parameters :: [term()]) ->query_result().
 execute(Pool, Name, Parameters) when is_atom(Name), is_list(Parameters) ->
     execute(Pool, Name, Parameters,?TRANSACTION_TIMEOUT).
 
--spec execute(Pool :: pool(), Name :: atom(),
+-spec execute(Pool :: pool(), Name :: binary(),
 		Parameters :: [term()],Timeout :: non_neg_integer()) ->query_result().
 execute(Pool, Name, Parameters,Timeout) when is_atom(Name), is_list(Parameters) ->
 	 sql_call(Pool, {sql_execute, Name, Parameters},Timeout).
@@ -252,9 +252,8 @@ schedule_keepalive(KeepaliveInterval) ->
 					ok
 	end.
 
-sql_query_internal(Query, #state{settings = Settings,db_ref = DBRef}) ->
-	QueryTimeout = proplists:get_value(query_timeout,Settings),
-	rdbms_pgsql:query(DBRef, Query, QueryTimeout).
+sql_query_internal(Query, #state{db_ref = DBRef}) ->
+	rdbms_pgsql:query(DBRef, Query).
 
 -spec sql_execute(Name :: atom(), Params :: [term()], state()) -> {query_result(), state()}.
 sql_execute(Name, Params, State = #state{db_ref = DBRef,settings = Settings}) ->
@@ -264,7 +263,7 @@ sql_execute(Name, Params, State = #state{db_ref = DBRef,settings = Settings}) ->
     {Res, NewState}.
 
 -spec prepare_statement(Name :: atom(), state()) -> {Ref :: term(), state()}.
-prepare_statement(Name, State = #state{db_ref = DBRef, prepared = Prepared, pool = Pool}) ->
+prepare_statement(Name, State = #state{db_ref = DBRef, prepared = Prepared}) ->
 	    case maps:get(Name, Prepared, undefined) of
 	        undefined ->
 	            [{_, Statement}] = ets:lookup(prepared_statements, Name),

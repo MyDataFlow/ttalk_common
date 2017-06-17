@@ -2,7 +2,7 @@
 
 -include_lib("epgsql/include/epgsql.hrl").
 
--export([connect/2, disconnect/1, query/3, prepare/3, execute/4]).
+-export([connect/2, disconnect/1, query/2, prepare/3, execute/4]).
 
 -spec connect(Args :: any(), QueryTimeout :: non_neg_integer()) ->
                      {ok, Connection :: term()} | {error, Reason :: any()}.
@@ -20,18 +20,16 @@ connect(Settings, QueryTimeout) ->
 disconnect(Connection) ->
     epgsql:close(Connection).
 
--spec query(Connection :: term(), Query :: any(),
-            Timeout :: infinity | non_neg_integer()) -> rdbms_worker:query_result().
-query(Connection, Query, _Timeout) ->
+-spec query(Connection :: term(), Query :: any()) -> rdbms_worker:query_result().
+query(Connection, Query) ->
     pgsql_to_odbc(epgsql:equery(Connection, Query,[])).
 
 -spec prepare(Connection :: term(), Name :: atom(),
   Statement :: iodata()) -> {ok, term()} | {error, any()}.
 prepare(Connection, Name, Statement) ->
-    BinName = atom_to_binary(Name, latin1),
     ReplacedStatement = replace_question_marks(Statement),
-    case epgsql:parse(Connection, BinName, ReplacedStatement, []) of
-        {ok, _} -> {ok, BinName};
+    case epgsql:parse(Connection, Name, ReplacedStatement, []) of
+        {ok, _} -> {ok, Name};
         Error   -> Error
     end.
 
